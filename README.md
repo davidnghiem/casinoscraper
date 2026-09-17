@@ -80,7 +80,43 @@ team actually sees in the notification.
 
 The header therefore carries a verdict tally — `— ❌ 1  ⚠️ 6  ✅ 15`, in severity
 order, omitting verdicts that did not occur — so the outcome is legible while
-collapsed. The per-game detail below it is unchanged; nothing is summarised away.
+collapsed.
+
+### Numbered runs share one block
+
+Large releases are rare except for table games, which ship as near-identical
+numbered families: Free Bet Blackjack 13/14/15/16, one provider, one fee group,
+one RTP and necessarily the same verdict. Eight of those rendered as eight
+identical nine-line blocks — 75 lines for what is really two facts.
+
+Such a run now shares one block:
+
+```
+*Free Bet Blackjack 13, 14, 15, 16* (Evolution) — 4 games, identical results
+  ❌ Not on Dicey yet
+  Source RTP: 99.29%
+  ❌ Shuffle — not found
+  ⚠️ Stake — error: HTTP 451
+  ❌ Rainbet — not found
+  ❌ Roobet — not found
+  ⚠️ *Gate 1:* Not offered by any competitor → Escalate
+```
+
+That alert goes from 75 lines to 21 with nothing lost. Grouping is deliberately
+narrow — games must be **consecutive**, share a **provider**, share a **title
+stem differing only by a trailing number**, and render a **byte-identical body**:
+
+- Only consecutive runs collapse, so message order survives.
+- Two families whose bodies coincide stay apart. Free Bet Blackjack and Classic
+  Bet Stacker Blackjack are both 0/4 at 99.29%, so their bodies match exactly —
+  merging them would read as one game.
+- Numbers are listed, not ranged, so a gap (`13, 14, 16`) stays visible.
+- The header still counts games, not blocks: 8 games in 2 blocks reads
+  `*8 matched releases checked*`.
+
+Verified against every fixture with all sites forced to "not found" — the
+strictest case for accidental merging — and nothing groups except the two
+blackjack families. Ordinary releases are byte-identical to before.
 
 Note that reply length is coupled to `PROVIDERS`: one prose-dialect mail carried
 22 release headings and reports 5 today only because the allowlist is stale.
@@ -315,7 +351,7 @@ npm run dev              # tsx hot-run (start the bot)
 npm run build            # tsc → dist/
 npm start                # node dist/src/index.js (after build)
 npm run typecheck        # tsc --noEmit
-npm test                 # node --test against tests/*.test.ts (88 tests)
+npm test                 # node --test against tests/*.test.ts (95 tests)
 npm run canary           # Dicey GraphQL schema canary (used by GH Actions daily)
 npm run dryrun:alerts    # Process every fixture in tests/fixtures/ through dispatch(), print would-be Slack replies
 npm run dryrun:alerts -- --include-releases   # Also run the multi-game release fixture (hits Cloudflare; takes ~30s)
@@ -348,7 +384,7 @@ scripts/
 tests/
   extract.test.ts   41 tests covering all 7 alert parsers, both release dialects, multi-config releases, postponement notes, title/provider edge cases + matchProvider
   gate.test.ts      20 tests covering Gate 1 verdicts (0/4 → 4/4, RTP variance, config-explained spread, adaptive tolerance, errors)
-  handlers.test.ts  16 tests for formatReleaseReply across listing counts, RTP variance, slash providers, Dicey states, headline naming, build labels + the verdict tally
+  handlers.test.ts  23 tests for formatReleaseReply across listing counts, RTP variance, slash providers, Dicey states, headline naming, build labels, the verdict tally + numbered-run grouping
   matching.test.ts  9 tests for the Shuffle/Rainbet match floors (false positives, provider prefixes, apostrophes)
   mention.test.ts   2 tests that release replies tag @mops-dicey (own file: env is read at module load)
   fixtures/         Captured SOFTSWISS message bodies, one per alert type (+2 multi-config releases, +2 prose dialect)

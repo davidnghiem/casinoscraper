@@ -56,7 +56,7 @@ export function formatReleaseReply(checked: CheckedReleaseGame[]): string {
   const head = `${mention()}🎰 *${checked.length} matched release${
     checked.length === 1 ? '' : 's'
   } checked*${formatVerdictTally(checked)}`;
-  const sections = checked.map(formatReleaseSection).join('\n\n');
+  const sections = formatReleaseSections(checked).join('\n\n');
   return `${head}\n\n${sections}`;
 }
 
@@ -216,22 +216,33 @@ function mention(): string {
   return ALERT_USERGROUP_ID ? `<!subteam^${ALERT_USERGROUP_ID}> ` : '';
 }
 
-function formatReleaseSection(c: CheckedReleaseGame): string {
-  const { game, providerRaw, matchedProviders, rtp, results, dicey, gate } = c;
+function canonicalNameOf(c: CheckedReleaseGame): string {
+  const { game, results, dicey } = c;
   // Prefer a real title from a site that publishes one. Rainbet is excluded on
   // purpose: its "name" is derived from a sitemap slug, so it arrives
   // lowercased, punctuation-stripped and provider-prefixed ("playn go lawn n
   // complete disorder") and would replace the actual release title.
-  const canonicalName =
+  return (
     (dicey.found && dicey.name) ||
     (results.shuffle?.found && results.shuffle.name) ||
     (results.stake?.found && results.stake.name) ||
     (results.roobet?.found && results.roobet.name) ||
-    game;
-  const providerDisplay = providerRaw?.includes('/')
+    game
+  );
+}
+
+function providerDisplayOf(c: CheckedReleaseGame): string {
+  const { providerRaw, matchedProviders } = c;
+  return providerRaw?.includes('/')
     ? providerRaw
     : matchedProviders[0] || providerRaw || 'unknown';
-  const lines = [`*${canonicalName}* (${providerDisplay})`];
+}
+
+// Everything below the heading. Two games whose bodies are byte-identical are
+// indistinguishable in the reply, which is what lets them share one block.
+function formatReleaseBody(c: CheckedReleaseGame): string {
+  const { providerRaw, matchedProviders, rtp, results, dicey, gate } = c;
+  const lines: string[] = [];
   if (
     providerRaw?.includes('/') &&
     matchedProviders.length < providerRaw.split('/').length
@@ -266,6 +277,68 @@ function formatReleaseSection(c: CheckedReleaseGame): string {
   lines.push(formatSiteLine('Roobet', results.roobet, configs));
   lines.push(`  ${gate.icon} *Gate 1:* ${gate.summary}`);
   return lines.join('\n');
+}
+
+// "Free Bet Blackjack 13" -> stem "Free Bet Blackjack", number "13".
+function splitNumberedTitle(
+  name: string
+): { stem: string; number: string } | null {
+  const m = name.match(/^(.*\S)\s+(\d+)$/);
+  return m ? { stem: m[1]!, number: m[2]! } : null;
+}
+
+// Table games ship in near-identical numbered runs — Free Bet Blackjack
+// 13/14/15/16, one provider, one fee group, one RTP and necessarily the same
+// verdict. Repeating an identical nine-line block per game is the main driver
+// of reply length, so such a run shares one block.
+//
+// Grouping is deliberately narrow: the games must be consecutive (message order
+// survives), share a provider, share a title stem that differs only by a
+// trailing number, and render a byte-identical body. Two different families
+// whose bodies happen to coincide — Free Bet Blackjack and Classic Bet Stacker
+// Blackjack both being 0/4 at 99.29% — stay apart, because merging them under
+// one heading reads as though they were the same game. Numbers are listed, not
+// ranged, so a gap (13, 14, 16) is visible.
+function formatReleaseSections(checked: CheckedReleaseGame[]): string[] {
+  const out: string[] = [];
+  let i = 0;
+  while (i < checked.length) {
+    const first = checked[i]!;
+    const body = formatReleaseBody(first);
+    const provider = providerDisplayOf(first);
+    const parts = splitNumberedTitle(canonicalNameOf(first));
+
+    let j = i + 1;
+    if (parts) {
+      while (j < checked.length) {
+        const next = checked[j]!;
+        const nextParts = splitNumberedTitle(canonicalNameOf(next));
+        if (
+          !nextParts ||
+          nextParts.stem !== parts.stem ||
+          providerDisplayOf(next) !== provider ||
+          formatReleaseBody(next) !== body
+        ) {
+          break;
+        }
+        j++;
+      }
+    }
+
+    const run = checked.slice(i, j);
+    let heading: string;
+    if (run.length === 1) {
+      heading = `*${canonicalNameOf(first)}* (${provider})`;
+    } else {
+      const numbers = run
+        .map((c) => splitNumberedTitle(canonicalNameOf(c))!.number)
+        .join(', ');
+      heading = `*${parts!.stem} ${numbers}* (${provider}) — ${run.length} games, identical results`;
+    }
+    out.push(`${heading}\n${body}`);
+    i = j;
+  }
+  return out;
 }
 
 function formatRecallReply(

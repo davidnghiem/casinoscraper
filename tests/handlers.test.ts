@@ -325,3 +325,89 @@ describe('formatReleaseReply — verdict tally header', () => {
   });
 });
 
+describe('formatReleaseReply — numbered runs share one block', () => {
+  // Table games ship as Free Bet Blackjack 13/14/15/16: one provider, one fee
+  // group, one RTP, same verdict. Eight of those rendered as eight identical
+  // nine-line blocks is what made a release reply 75 lines.
+  const NOT_FOUND = {
+    shuffle: { found: false },
+    stake: { found: false },
+    rainbet: { found: false },
+    roobet: { found: false }
+  };
+  const g = (game: string, provider = 'Evolution', results = NOT_FOUND) =>
+    makeRelease({ game, matchedProviders: [provider], results });
+
+  it('collapses a numbered run into one block with the stem shared', () => {
+    const out = formatReleaseReply([
+      g('Free Bet Blackjack 13'),
+      g('Free Bet Blackjack 14'),
+      g('Free Bet Blackjack 15'),
+      g('Free Bet Blackjack 16')
+    ]);
+    assert.match(
+      out,
+      /\*Free Bet Blackjack 13, 14, 15, 16\* \(Evolution\) — 4 games, identical results/
+    );
+    // One body, not four.
+    assert.equal(out.match(/Gate 1:/g)?.length, 1);
+  });
+
+  it('counts every game in the header, not every block', () => {
+    const out = formatReleaseReply([
+      g('Free Bet Blackjack 13'),
+      g('Free Bet Blackjack 14')
+    ]);
+    assert.match(out.split('\n')[0]!, /\*2 matched releases checked\*/);
+  });
+
+  it('keeps different title stems apart even when bodies coincide', () => {
+    // Both families are 0/4 at the same RTP, so their bodies are identical —
+    // merging them under one heading would read as one game.
+    const out = formatReleaseReply([
+      g('Free Bet Blackjack 13'),
+      g('Free Bet Blackjack 14'),
+      g('Classic Bet Stacker Blackjack 23'),
+      g('Classic Bet Stacker Blackjack 24')
+    ]);
+    assert.match(out, /\*Free Bet Blackjack 13, 14\*/);
+    assert.match(out, /\*Classic Bet Stacker Blackjack 23, 24\*/);
+    assert.equal(out.match(/Gate 1:/g)?.length, 2);
+  });
+
+  it('shows a gap in the numbering rather than implying a range', () => {
+    const out = formatReleaseReply([
+      g('Free Bet Blackjack 13'),
+      g('Free Bet Blackjack 14'),
+      g('Free Bet Blackjack 16')
+    ]);
+    assert.match(out, /\*Free Bet Blackjack 13, 14, 16\*/);
+  });
+
+  it('does not group when any rendered detail differs', () => {
+    const out = formatReleaseReply([
+      g('Free Bet Blackjack 13'),
+      g('Free Bet Blackjack 14', 'Evolution', {
+        ...NOT_FOUND,
+        shuffle: { found: true, rtp: 99.29 }
+      })
+    ]);
+    assert.doesNotMatch(out, /identical results/);
+    assert.equal(out.match(/Gate 1:/g)?.length, 2);
+  });
+
+  it('does not group across different providers', () => {
+    const out = formatReleaseReply([
+      g('Blackjack 1', 'Evolution'),
+      g('Blackjack 2', 'Playtech')
+    ]);
+    assert.doesNotMatch(out, /identical results/);
+  });
+
+  it('leaves an unnumbered title rendering exactly as before', () => {
+    const out = formatReleaseReply([g('Sweet Bonanza', 'Pragmatic Play')]);
+    assert.match(out, /\*Sweet Bonanza\* \(Pragmatic Play\)/);
+    assert.doesNotMatch(out, /identical results/);
+  });
+});
+
