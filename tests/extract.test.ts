@@ -407,3 +407,23 @@ describe('parseReleaseMessage — standalone Certifications lines', () => {
   });
 });
 
+describe('parseReleaseMessage — malformed input guard', () => {
+  // If a message reaches us without its line breaks (a paste or a mangled
+  // forward), game headings absorb the previous certs line or the timestamp.
+  // Looking those up produces five site lookups under a junk name, so such
+  // headings are skipped.
+  it('skips headings carrying detail-line syntax or a timestamp', () => {
+    const mangled =
+      'New Games ReleasedSource:\n' +
+      'SOFTSWISS GA announcementsTime:\n' +
+      '2026-09-17 12:07:20Curacao+MaltaWolf of London (Yggdrasil)\n' +
+      'Fee: basic | RTP: 96.80 | Certs: CW EE KA LV MT NL BRFist of Destruction (Hacksaw)\n' +
+      'Fee: hacksaw_basic | RTP: 96.23 | Certs: CW EE MT\n';
+    assert.deepEqual(parseReleaseMessage(mangled), []);
+  });
+
+  it('leaves a correctly delimited message untouched', () => {
+    assert.equal(parseReleaseMessage(fixture('release.txt')).length, 11);
+  });
+});
+

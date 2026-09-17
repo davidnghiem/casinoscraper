@@ -77,9 +77,9 @@ The full list mirrors `ALLOWED_PROVIDERS` in [magiceden-vibes/tg-slack-softswiss
 | Site | Catalog access | RTP | Notes |
 |---|---|---|---|
 | **Dicey** (own) | `api.dicey.com/graphql` — `GameList(input: { search })` | ❌ not in schema | Reports `isActive` + `isGeoRestricted`. Post-fetch `fuzz.ratio ≥ 85` floor to reject "Cat in Vegas" → "Weekend In Vegas" style false positives. |
-| **Shuffle** | Public flat JSON catalog (~5,600 games) | ✅ via `edge` field → `(10000 − edge) / 100` | One unauth HTTP GET, hourly cache |
+| **Shuffle** | Public flat JSON catalog (~5,600 games) | ✅ via `edge` field → `(10000 − edge) / 100` | One unauth HTTP GET, hourly cache. `fuzz.ratio ≥ 85` floor. |
 | **Stake** | Slot detail page behind Cloudflare | ✅ scraped from detail page | Pre-warmed Playwright context with `puppeteer-extra-plugin-stealth` |
-| **Rainbet** | Public sitemap (`/sitemap/casino.xml`, ~4,100 slot pages) | ❌ not in sitemap | The JSON API (`services.rainbet.com`) is behind a Cloudflare **Turnstile** managed challenge that 403s even the site's own frontend until `cf_clearance` is issued — unsolvable by stealth `fetch()`. The main-domain sitemap is unchallenged; we fuzzy-match the game slug against it. One unauth HTTP GET, hourly cache. |
+| **Rainbet** | Public sitemap (`/sitemap/casino.xml`, ~4,100 slot pages) | ❌ not in sitemap | The JSON API (`services.rainbet.com`) is behind a Cloudflare **Turnstile** managed challenge that 403s even the site's own frontend until `cf_clearance` is issued — unsolvable by stealth `fetch()`. The main-domain sitemap is unchallenged; we fuzzy-match the game slug against it. One unauth HTTP GET, hourly cache. Query-token coverage + `partial_ratio ≥ 90` floor. |
 | **Roobet** | `/casino/game/<provider>-<slug>` page title | ❌ not published publicly | SPA: title is set client-side ~2s in, so we poll for it. Slugs are provider-prefixed; the bare slug is tried in parallel as a fallback. |
 
 ### Cloudflare handling
@@ -90,6 +90,44 @@ Stake and Rainbet sit behind Cloudflare. We handle this in two ways:
 - **Warmed contexts**: each site opens one Playwright context, navigates to the homepage at startup, lets the Cloudflare challenge resolve, then keeps that context (with cookies) alive for 25 minutes. Subsequent game lookups reuse the cleared context.
 
 Both fail gracefully: if a warmup throws, the cache entry is **deleted** (not poisoned) so the next call retries instead of returning the same rejection forever. If Cloudflare blocks the request (typically because you're in a blocked geo — the main case being US), the per-game line shows `⚠️ <site> — error: HTTP 451` or `HTTP 403` and Gate 1 degrades to "escalate". Note that a blocked site drops out of the listed count, so a game on 3 real sites can read as 2/4 → escalate from a US IP. Run from Toronto.
+
+## Match floors
+
+fuse.js's composite score on its own is loose enough to return a *different*
+game: `Cat in Vegas` comes back as `Weekend In Vegas` on the shared tail tokens.
+Dicey has guarded against this since the start with a `fuzz.ratio ≥ 85`
+post-check. Shuffle and Rainbet did not, so a wrong hit counted toward the
+Gate 1 listed count — and unlike a missed match, which pushes a game toward
+"escalate", a false hit pushes it toward **"Proceed to Phase 2"**.
+
+Each adapter needs a different measure, because their catalogs store names
+differently:
+
+| Adapter | Catalog stores | Guard |
+|---|---|---|
+| Dicey | Real titles | `fuzz.ratio ≥ 85` |
+| Shuffle | Real titles | `fuzz.ratio ≥ 85` |
+| Rainbet | Provider-prefixed slugs (`betsoft weekend in vegas`) | every query token present **and** `partial_ratio ≥ 90` |
+| Stake, Roobet | n/a — slug-addressed pages, no fuzzy step | none needed |
+
+Rainbet cannot use a plain ratio floor: its slugs carry a provider prefix, so
+genuine matches measure 68–84 and an 85 floor would reject all of them. Measured
+on real data, every genuine match has full query-token coverage and
+`partial_ratio ≥ 98`, while `Cat in Vegas` → `betsoft weekend in vegas` scores 75
+and is missing the `cat` token. `token_set_ratio` does **not** separate them
+(81 genuine vs 80 false), which is why coverage does the work.
+
+Apostrophes are dropped rather than spaced out before tokenizing, so `Thor's`
+becomes `thors` and lines up with the slug's `thors`. `normalize()` alone splits
+it into `thor` + `s`, which no slug covers — that rejected a real match.
+
+### Malformed input
+
+A game heading that still carries detail-line syntax (`Fee:`, `RTP -`,
+`Certifications:`) or an ISO timestamp means the message arrived without its
+line breaks — a paste or a mangled forward. Those headings are skipped rather
+than fanned out to five sites under a junk name. A correctly delimited message
+is unaffected.
 
 ## Gate 1 verdict logic
 
@@ -228,7 +266,7 @@ npm run dev              # tsx hot-run (start the bot)
 npm run build            # tsc → dist/
 npm start                # node dist/src/index.js (after build)
 npm run typecheck        # tsc --noEmit
-npm test                 # node --test against tests/*.test.ts (68 tests)
+npm test                 # node --test against tests/*.test.ts (77 tests)
 npm run canary           # Dicey GraphQL schema canary (used by GH Actions daily)
 npm run dryrun:alerts    # Process every fixture in tests/fixtures/ through dispatch(), print would-be Slack replies
 npm run dryrun:alerts -- --include-releases   # Also run the multi-game release fixture (hits Cloudflare; takes ~30s)
@@ -248,9 +286,9 @@ src/
   gate.ts         computeGate() + matchConfig(): pure Gate 1 verdict function
   browser.ts      Shared headless Chromium + per-site warmed Playwright contexts with cache-poisoning guard
   dicey.ts        api.dicey.com GraphQL adapter (fetch-only)
-  shuffle.ts      Hourly-cached catalog fetch (fetch-only)
+  shuffle.ts      Hourly-cached catalog fetch (fetch-only; fuzz.ratio floor)
   stake.ts        Slot detail page scrape (Playwright)
-  rainbet.ts      Sitemap-catalog fuzzy match (fetch-only; API is Turnstile-walled)
+  rainbet.ts      Sitemap-catalog fuzzy match (fetch-only; API is Turnstile-walled; token-coverage floor)
   roobet.ts       Slot detail page title parse (Playwright; polls for client-set title, provider-prefixed slug + bare fallback)
 
 scripts/
@@ -262,6 +300,7 @@ tests/
   extract.test.ts   36 tests covering all 7 alert parsers, both release dialects, multi-config releases, title/provider edge cases + matchProvider
   gate.test.ts      20 tests covering Gate 1 verdicts (0/4 → 4/4, RTP variance, config-explained spread, adaptive tolerance, errors)
   handlers.test.ts  12 tests for formatReleaseReply across listing counts, RTP variance, slash providers, Dicey states, headline naming + build labels
+  matching.test.ts  9 tests for the Shuffle/Rainbet match floors (false positives, provider prefixes, apostrophes)
   fixtures/         Captured SOFTSWISS message bodies, one per alert type (+2 multi-config releases, +1 prose dialect)
 
 .github/workflows/

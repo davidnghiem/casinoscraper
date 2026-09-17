@@ -199,6 +199,13 @@ const DETAIL_LINE_RE =
 // Salutations and sign-offs in dialect B are not location headers.
 const PROSE_LINE_RE =
   /^(?:dear\b|hi\b|hello\b|the\s+following\b|please\s+note\b)/i;
+// A "game heading" that still carries detail-line syntax, or runs absurdly
+// long, means the message reached us without its line breaks (a paste or a
+// mangled forward). Looking those titles up yields nothing but noise, so the
+// game is skipped rather than fanned out to five sites under a junk name.
+const ARTIFACT_TITLE_RE =
+  /\b(?:fee|rtp|certifications?|certs?)\s*[:\-]|\d{4}-\d{2}-\d{2}|\d{2}:\d{2}:\d{2}/i;
+const MAX_TITLE_LEN = 80;
 
 export function parseReleaseMessage(text: string): MatchedGame[] {
   if (!text) return [];
@@ -249,6 +256,8 @@ export function parseReleaseMessage(text: string): MatchedGame[] {
           for (const c of configs) if (c.certs == null) c.certs = certs;
         }
       }
+
+      if (ARTIFACT_TITLE_RE.test(game) || game.length > MAX_TITLE_LEN) continue;
 
       const matchedProviders = matchProvidersForRaw(providerRaw);
 

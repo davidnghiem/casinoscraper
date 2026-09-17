@@ -1,5 +1,20 @@
-import { fuzzyFind } from './fuzzy.js';
+import * as fuzz from 'fuzzball';
+import { fuzzyFind, normalize } from './fuzzy.js';
 import type { SiteResult } from './types.js';
+
+// Same post-check as the Dicey adapter, for the same reason: fuse.js's
+// composite score is loose enough that "Cat in Vegas" comes back as
+// "Weekend In Vegas" on the shared tail tokens. Shuffle's catalog stores real
+// titles, so a straight ratio is the right measure. A false positive here is
+// worse than a miss — it inflates the Gate 1 listed count and can turn a game
+// no competitor carries into "Proceed to Phase 2".
+const NAME_RATIO_FLOOR = 85;
+
+// Drop apostrophes instead of spacing them out, so "Thor's" compares as
+// "thors" against catalogs that spell it either way.
+export function normName(s: string): string {
+  return normalize(s.replace(/['\u2018\u2019\u02BC]/g, ''));
+}
 
 const CATALOG_URL =
   'https://shuffle.com/main-api/bp-storage/public-assets/games/games.json';
@@ -51,6 +66,14 @@ export async function searchShuffle(gameName: string): Promise<SiteResult> {
   if (!hit) return { found: false, _debug: dbg };
   const g = hit.item;
   dbg.matchScore = hit.score;
+
+  const ratio = fuzz.ratio(normName(gameName), normName(g.name));
+  dbg.nameRatio = ratio;
+  if (ratio < NAME_RATIO_FLOOR) {
+    dbg.rejectedBy = `name ratio ${ratio} < ${NAME_RATIO_FLOOR}`;
+    return { found: false, _debug: dbg };
+  }
+
   return {
     found: true,
     name: g.name,
