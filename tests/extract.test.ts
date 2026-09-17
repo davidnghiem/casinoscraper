@@ -22,6 +22,7 @@ describe('detectAlertType', () => {
       ['release-multiconfig.txt', 'released'],
       ['release-multiconfig-2.txt', 'released'],
       ['release-prose.txt', 'released'],
+      ['release-prose-2.txt', 'released'],
       ['recall-single.txt', 'recall'],
       ['recall-multi.txt', 'recall'],
       ['urgent.txt', 'urgent'],
@@ -424,6 +425,63 @@ describe('parseReleaseMessage — malformed input guard', () => {
 
   it('leaves a correctly delimited message untouched', () => {
     assert.equal(parseReleaseMessage(fixture('release.txt')).length, 11);
+  });
+});
+
+describe('parseReleaseMessage — postponement notes are not releases', () => {
+  // Release mails close with notes listing games in the same "Name (Provider)"
+  // shape but meaning the opposite. A postponed Evolution title was being
+  // reported as shipped and sent for a Gate 1 verdict.
+  const games = (
+    parseAlert(fixture('release-prose-2.txt')) as Extract<
+      ParsedAlert,
+      { type: 'released' }
+    >
+  ).games;
+
+  it('reports only the games actually released', () => {
+    assert.equal(games.length, 8);
+  });
+
+  it('excludes every postponed game', () => {
+    for (const title of [
+      'Disco Roulette',
+      'Chop Chop',
+      'Parrot Roulette',
+      'Hotline Money'
+    ]) {
+      assert.ok(
+        !games.some((g) => g.game.includes(title)),
+        `${title} was postponed and must not be reported as released`
+      );
+    }
+  });
+
+  it('keeps sequential near-identical titles distinct', () => {
+    assert.deepEqual(
+      games.map((g) => g.game),
+      [
+        'Free Bet Blackjack 13',
+        'Free Bet Blackjack 14',
+        'Free Bet Blackjack 15',
+        'Free Bet Blackjack 16',
+        'Classic Bet Stacker Blackjack 23',
+        'Classic Bet Stacker Blackjack 24',
+        'Classic Bet Stacker Blackjack 25',
+        'Classic Bet Stacker Blackjack 26'
+      ]
+    );
+  });
+
+  it('matches a header that reads "are also released today"', () => {
+    assert.equal(detectAlertType(fixture('release-prose-2.txt')), 'released');
+  });
+
+  it('ignores a bulleted "Name (Provider)" list item', () => {
+    const out = parseReleaseMessage(
+      'The following games are released today:\n\nCuracao+Malta:\n\n- Disco Roulette (Evolution)\n'
+    );
+    assert.deepEqual(out, []);
   });
 });
 

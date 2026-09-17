@@ -1,0 +1,61 @@
+Dear team!
+The following games are also released today:
+
+Curacao+Malta:
+
+Free Bet Blackjack 13 (Evolution):
+    - fee group: live_classic_premium ; RTP - 99.29
+    - Certifications: CW MT EE
+
+Free Bet Blackjack 14 (Evolution):
+    - fee group: live_classic_premium ; RTP - 99.29
+    - Certifications: CW MT EE
+
+Free Bet Blackjack 15 (Evolution):
+    - fee group: live_classic_premium ; RTP - 99.29
+    - Certifications: CW MT EE
+
+Free Bet Blackjack 16 (Evolution):
+    - fee group: live_classic_premium ; RTP - 99.29
+    - Certifications: CW MT EE
+
+Classic Bet Stacker Blackjack 23 (Evolution):
+    - fee group: live_classic ; RTP - 99.29
+    - Certifications: CW MT EE
+
+Classic Bet Stacker Blackjack 24 (Evolution):
+    - fee group: live_classic ; RTP - 99.29
+    - Certifications: CW MT EE
+
+Classic Bet Stacker Blackjack 25 (Evolution):
+    - fee group: live_classic ; RTP - 99.29
+    - Certifications: CW MT EE
+
+Classic Bet Stacker Blackjack 26 (Evolution):
+    - fee group: live_classic ; RTP - 99.29
+    - Certifications: CW MT EE
+
+Only Curacao:
+
+Ancient Rome Deluxe AI (Mrslotty/Eagaming):
+    - fee group: eagaming ; RTP - 95.00
+    - Certifications: CW
+
+Roulette French (Pascal/CreedRoomz):
+    - fee group: creedroomz_basic ; RTP - 97.30
+    - Certifications: BR BG CW EE GE LV LT PE ZA UA
+
+Aurum Roulette French (Pascal/CreedRoomz):
+    - fee group: premium ; RTP - 97.00
+    - Certifications: BR BG CW EE GE LV LT PE ZA UA
+
+40 Boost Hot Reload (Alea/Felixgaming):
+    - fee group: felixgaming_basic ; RTP - 96.62
+    - Certifications: CW
+
+Please note that:
+the release of the following games has been postponed:
+- Disco Roulette (Evolution)
+- Chop Chop (Esoterica Games)
+- Parrot Roulette (EverestPlat)
+- Hotline Money (100HP)

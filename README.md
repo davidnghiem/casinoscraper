@@ -2,7 +2,7 @@
 
 Slack bot that processes SOFTSWISS Alerts (new game releases, recalls, URGENT disables, RTP changes, enabled-back, maintenance) and reconciles each event against Dicey + four competitor crypto-casinos (Shuffle, Stake, Rainbet, Roobet).
 
-Watches `#ext-everhelp-dicey-alerts` for SOFTSWISS bot posts, classifies each by type, and replies in-thread with a per-type advisory. Actionable replies (something on Dicey needs human attention) `@`-mention the `@mops-dicey` Slack user-group (configurable via `SLACK_ALERT_USERGROUP_ID`); non-actionable replies stay quiet.
+Watches `#ext-everhelp-dicey-alerts` for SOFTSWISS bot posts, classifies each by type, and replies in-thread with a per-type advisory. Actionable replies (something on Dicey needs human attention) `@`-mention the `@mops-dicey` Slack user-group (configurable via `SLACK_ALERT_USERGROUP_ID`); non-actionable replies stay quiet. Release replies always mention the group: every game in one carries a Gate 1 verdict the team has to action, and the reply closes with the acknowledgement protocol.
 
 > ⚠️ **Deploy from a Toronto / non-US VPS.** Stake and Rainbet's Cloudflare edge geo-blocks US visitors at the network layer — no stealth plugin, no warmed context, no proxy at the app layer can fix this. A US-based VPS returns "⚠️ error: HTTP 451" (Stake, as of 2026-09) or HTTP 403 on Stake and Rainbet for every game, gracefully degrading the Gate 1 verdict to "escalate". Canadian residents are allowed on all four sites, and Cloudflare clears cleanly after a warmup nav. See [Deployment](#deployment).
 
@@ -10,7 +10,7 @@ Watches `#ext-everhelp-dicey-alerts` for SOFTSWISS bot posts, classifies each by
 
 | Type | Trigger | What we do |
 |---|---|---|
-| **Release** | `New Games Released` header | Parse multi-game block, fan out to 4 competitors + Dicey, post one consolidated reply with per-game Gate 1 verdicts |
+| **Release** | `New Games Released` header, or `…games are (also) released today` | Parse multi-game block (either dialect), fan out to 4 competitors + Dicey, `@mops-dicey` + one consolidated reply with per-game Gate 1 verdicts |
 | **Recall** | `the game X has been recalled` / `the following X games have been recalled` | Per game: if active on Dicey → @mops-dicey + recommend deactivate + persist to `state/recalls.json` keyed by canonical provider |
 | **URGENT** | `#URGENT` or `temporarily disabled` + `freeze withdrawals` | Same as recall but with stronger framing (freeze withdrawals + deactivate) |
 | **RTP change** | `value of RTP in the game X has been changed from A to B` | If active on Dicey → @mops-dicey + post old → new RTP + Δ pp + "verify and update RTP config". Handles `.` and `,` decimals. |
@@ -120,6 +120,29 @@ and is missing the `cat` token. `token_set_ratio` does **not** separate them
 Apostrophes are dropped rather than spaced out before tokenizing, so `Thor's`
 becomes `thors` and lines up with the slug's `thors`. `normalize()` alone splits
 it into `thor` + `s`, which no slug covers — that rejected a real match.
+
+### Postponement notes
+
+Release mails close with notes that list games in the same `Name (Provider)`
+shape but mean the opposite:
+
+```
+Please note that:
+the release of the following games has been postponed:
+- Disco Roulette (Evolution)
+- Chop Chop (Esoterica Games)
+```
+
+Evolution is allowlisted, so `- Disco Roulette (Evolution)` parsed as a release
+and was fanned out for a Gate 1 verdict — the bot reporting a game as shipped
+when the message said it had not. Parsing now stops at a line matching
+`postponed` / `cancelled` / `delayed` / `rescheduled`, and a bulleted
+`Name (Provider)` line is treated as a list item rather than a game heading
+(real release headings are never bulleted). Both guards are applied, so either
+one alone still catches it.
+
+Postponed games are not reported anywhere — they are dropped, not surfaced. If
+the team needs to know about them, that is a seventh alert type.
 
 ### Malformed input
 
@@ -266,7 +289,7 @@ npm run dev              # tsx hot-run (start the bot)
 npm run build            # tsc → dist/
 npm start                # node dist/src/index.js (after build)
 npm run typecheck        # tsc --noEmit
-npm test                 # node --test against tests/*.test.ts (77 tests)
+npm test                 # node --test against tests/*.test.ts (84 tests)
 npm run canary           # Dicey GraphQL schema canary (used by GH Actions daily)
 npm run dryrun:alerts    # Process every fixture in tests/fixtures/ through dispatch(), print would-be Slack replies
 npm run dryrun:alerts -- --include-releases   # Also run the multi-game release fixture (hits Cloudflare; takes ~30s)
@@ -297,11 +320,12 @@ scripts/
   dryrun-alerts.ts  Run every fixture through dispatch() with a tmp state file
 
 tests/
-  extract.test.ts   36 tests covering all 7 alert parsers, both release dialects, multi-config releases, title/provider edge cases + matchProvider
+  extract.test.ts   41 tests covering all 7 alert parsers, both release dialects, multi-config releases, postponement notes, title/provider edge cases + matchProvider
   gate.test.ts      20 tests covering Gate 1 verdicts (0/4 → 4/4, RTP variance, config-explained spread, adaptive tolerance, errors)
   handlers.test.ts  12 tests for formatReleaseReply across listing counts, RTP variance, slash providers, Dicey states, headline naming + build labels
   matching.test.ts  9 tests for the Shuffle/Rainbet match floors (false positives, provider prefixes, apostrophes)
-  fixtures/         Captured SOFTSWISS message bodies, one per alert type (+2 multi-config releases, +1 prose dialect)
+  mention.test.ts   2 tests that release replies tag @mops-dicey (own file: env is read at module load)
+  fixtures/         Captured SOFTSWISS message bodies, one per alert type (+2 multi-config releases, +2 prose dialect)
 
 .github/workflows/
   canary.yml      Daily 13:00 UTC run of scripts/canary.ts; posts to SLACK_ERRORS_CHANNEL_ID on failure

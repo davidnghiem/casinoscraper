@@ -45,7 +45,12 @@ interface CheckedRecallGame extends MatchedGame {
 // reply text. Split out from handleRelease so tests can drive it directly
 // without hitting the network.
 export function formatReleaseReply(checked: CheckedReleaseGame[]): string {
-  const head = `🎰 *${checked.length} matched release${checked.length === 1 ? '' : 's'} checked*`;
+  // Releases carry a Gate 1 verdict the team has to action, and every reply
+  // ends with the ack protocol, so the group is tagged like the other
+  // actionable paths rather than left to whoever happens to read the thread.
+  const head = `${mention()}🎰 *${checked.length} matched release${
+    checked.length === 1 ? '' : 's'
+  } checked*`;
   const sections = checked.map(formatReleaseSection).join('\n\n');
   return `${head}\n\n${sections}`;
 }

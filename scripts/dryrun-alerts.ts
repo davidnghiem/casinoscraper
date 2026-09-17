@@ -54,6 +54,8 @@ if (includeReleases) {
   await runFixture('release-multiconfig-2.txt', 'TS-release-multiconfig-2');
   console.log(sep('Release in the prose "Dear team!" dialect'));
   await runFixture('release-prose.txt', 'TS-release-prose');
+  console.log(sep('Prose release with a trailing postponement note'));
+  await runFixture('release-prose-2.txt', 'TS-release-prose-2');
 } else {
   console.log(sep('Release fixture skipped by default'));
   console.log(

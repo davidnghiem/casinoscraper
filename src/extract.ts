@@ -206,6 +206,15 @@ const PROSE_LINE_RE =
 const ARTIFACT_TITLE_RE =
   /\b(?:fee|rtp|certifications?|certs?)\s*[:\-]|\d{4}-\d{2}-\d{2}|\d{2}:\d{2}:\d{2}/i;
 const MAX_TITLE_LEN = 80;
+// Release mails end with notes that list games in the same "Name (Provider)"
+// shape but mean the opposite — "the release of the following games has been
+// postponed". Everything after such a line is not a release, so parsing stops.
+// Without this, a postponed Evolution title was reported as shipped and sent
+// for a Gate 1 verdict.
+const STOP_SECTION_RE = /\b(?:postponed|cancell?ed|delayed|rescheduled)\b/i;
+// Those notes bullet their entries. A real release heading never is, so a
+// bulleted "Name (Provider)" is a list item, not a game being released.
+const BULLET_HEADING_RE = /^[-–—•*]\s+/;
 
 export function parseReleaseMessage(text: string): MatchedGame[] {
   if (!text) return [];
@@ -218,6 +227,7 @@ export function parseReleaseMessage(text: string): MatchedGame[] {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]!;
     if (!line) continue;
+    if (STOP_SECTION_RE.test(line)) break;
     if (RELEASE_HEADER_RE.test(line)) continue;
     if (META_LINE_RE.test(line)) continue;
 
@@ -258,6 +268,7 @@ export function parseReleaseMessage(text: string): MatchedGame[] {
       }
 
       if (ARTIFACT_TITLE_RE.test(game) || game.length > MAX_TITLE_LEN) continue;
+      if (BULLET_HEADING_RE.test(game)) continue;
 
       const matchedProviders = matchProvidersForRaw(providerRaw);
 
