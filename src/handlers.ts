@@ -48,11 +48,33 @@ export function formatReleaseReply(checked: CheckedReleaseGame[]): string {
   // Releases carry a Gate 1 verdict the team has to action, and every reply
   // ends with the ack protocol, so the group is tagged like the other
   // actionable paths rather than left to whoever happens to read the thread.
+  //
+  // A release reply runs ~10 lines per game with no cap, so Slack collapses it
+  // behind "Show more" from about ten games up. The verdict tally goes in the
+  // first line so the ping is scannable without expanding the post; the
+  // per-game detail below is unchanged.
   const head = `${mention()}🎰 *${checked.length} matched release${
     checked.length === 1 ? '' : 's'
-  } checked*`;
+  } checked*${formatVerdictTally(checked)}`;
   const sections = checked.map(formatReleaseSection).join('\n\n');
   return `${head}\n\n${sections}`;
+}
+
+// "— ❌ 1  ⚠️ 6  ✅ 15", in severity order, omitting verdicts that did not
+// occur so a single-game reply does not read as a row of zeroes.
+function formatVerdictTally(checked: CheckedReleaseGame[]): string {
+  const order: Array<[GateVerdict['verdict'], string]> = [
+    ['reject', '❌'],
+    ['escalate', '⚠️'],
+    ['proceed', '✅']
+  ];
+  const parts = order
+    .map(([verdict, icon]) => {
+      const n = checked.filter((c) => c.gate.verdict === verdict).length;
+      return n > 0 ? `${icon} ${n}` : null;
+    })
+    .filter((x): x is string => x !== null);
+  return parts.length > 0 ? ` — ${parts.join('  ')}` : '';
 }
 
 export async function dispatch(

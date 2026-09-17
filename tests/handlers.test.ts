@@ -262,3 +262,66 @@ describe('formatReleaseReply — naming and config labels', () => {
   });
 });
 
+describe('formatReleaseReply — verdict tally header', () => {
+  // A release reply is ~10 lines per game with no cap, so Slack collapses it
+  // behind "Show more" from roughly ten games up. The tally puts the outcome
+  // in the first line, which is what stays visible while collapsed.
+  const withVerdict = (v: 'proceed' | 'escalate' | 'reject') => {
+    const results: CheckedReleaseGame['results'] =
+      v === 'proceed'
+        ? {
+            shuffle: { found: true, rtp: 96.5 },
+            stake: { found: true, rtp: 96.5 },
+            rainbet: { found: true },
+            roobet: { found: true }
+          }
+        : v === 'reject'
+          ? {
+              shuffle: { found: true, rtp: 96.5 },
+              stake: { found: true, rtp: 92.0 },
+              rainbet: { found: true },
+              roobet: { found: true }
+            }
+          : {
+              shuffle: { found: false },
+              stake: { found: false },
+              rainbet: { found: false },
+              roobet: { found: false }
+            };
+    return makeRelease({
+      game: `Game ${v}`,
+      matchedProviders: ['Evolution'],
+      results
+    });
+  };
+
+  it('counts each verdict in severity order', () => {
+    const head = formatReleaseReply([
+      withVerdict('reject'),
+      ...Array.from({ length: 6 }, () => withVerdict('escalate')),
+      ...Array.from({ length: 15 }, () => withVerdict('proceed'))
+    ]).split('\n')[0];
+    assert.match(head!, /\*22 matched releases checked\* — ❌ 1  ⚠️ 6  ✅ 15$/);
+  });
+
+  it('omits verdicts that did not occur', () => {
+    const head = formatReleaseReply([
+      withVerdict('escalate'),
+      withVerdict('escalate')
+    ]).split('\n')[0];
+    assert.match(head!, /— ⚠️ 2$/);
+    assert.doesNotMatch(head!, /❌|✅/);
+  });
+
+  it('keeps the singular form for one game', () => {
+    const head = formatReleaseReply([withVerdict('proceed')]).split('\n')[0];
+    assert.match(head!, /\*1 matched release checked\* — ✅ 1$/);
+  });
+
+  it('leaves the per-game detail untouched below the header', () => {
+    const out = formatReleaseReply([withVerdict('proceed')]);
+    assert.match(out, /✅ Shuffle — RTP 96\.50%/);
+    assert.match(out, /✅ \*Gate 1:\* Widely offered/);
+  });
+});
+

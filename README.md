@@ -60,6 +60,32 @@ configs, and one line interleaved after each fee group.
 Note that games whose provider is not in `PROVIDERS` are dropped by design — a
 single dialect-B mail can list 23 games and report 5.
 
+## Reply length
+
+A release reply runs roughly 320–525 characters and ~10 lines **per game**, and
+grows linearly with no cap:
+
+| Games | Chars | Lines |
+|---|---|---|
+| 8 | 2,583 | 83 |
+| 10 | 3,992 | 103 |
+| 22 | 8,022 | 223 |
+| 22, all found, 4 configs each | 11,554 | 223 |
+
+`chat.postMessage` caps `text` at 40,000 characters, so truncation only becomes
+a risk somewhere around 75 games — not a practical concern. Slack's client,
+however, collapses a long message behind "Show more" from roughly ten games up,
+and release replies mention `@mops-dicey`, so the first line is what most of the
+team actually sees in the notification.
+
+The header therefore carries a verdict tally — `— ❌ 1  ⚠️ 6  ✅ 15`, in severity
+order, omitting verdicts that did not occur — so the outcome is legible while
+collapsed. The per-game detail below it is unchanged; nothing is summarised away.
+
+Note that reply length is coupled to `PROVIDERS`: one prose-dialect mail carried
+22 release headings and reports 5 today only because the allowlist is stale.
+Expanding it makes these posts proportionally longer.
+
 ## Provider matching
 
 Provider names in SOFTSWISS messages come in many forms (`Pragmaticplay`, `Playngo`, `Redtiger`, `Netent`, `Barbarabang`, `1spin4win`). We resolve them in three stages:
@@ -289,7 +315,7 @@ npm run dev              # tsx hot-run (start the bot)
 npm run build            # tsc → dist/
 npm start                # node dist/src/index.js (after build)
 npm run typecheck        # tsc --noEmit
-npm test                 # node --test against tests/*.test.ts (84 tests)
+npm test                 # node --test against tests/*.test.ts (88 tests)
 npm run canary           # Dicey GraphQL schema canary (used by GH Actions daily)
 npm run dryrun:alerts    # Process every fixture in tests/fixtures/ through dispatch(), print would-be Slack replies
 npm run dryrun:alerts -- --include-releases   # Also run the multi-game release fixture (hits Cloudflare; takes ~30s)
@@ -322,7 +348,7 @@ scripts/
 tests/
   extract.test.ts   41 tests covering all 7 alert parsers, both release dialects, multi-config releases, postponement notes, title/provider edge cases + matchProvider
   gate.test.ts      20 tests covering Gate 1 verdicts (0/4 → 4/4, RTP variance, config-explained spread, adaptive tolerance, errors)
-  handlers.test.ts  12 tests for formatReleaseReply across listing counts, RTP variance, slash providers, Dicey states, headline naming + build labels
+  handlers.test.ts  16 tests for formatReleaseReply across listing counts, RTP variance, slash providers, Dicey states, headline naming, build labels + the verdict tally
   matching.test.ts  9 tests for the Shuffle/Rainbet match floors (false positives, provider prefixes, apostrophes)
   mention.test.ts   2 tests that release replies tag @mops-dicey (own file: env is read at module load)
   fixtures/         Captured SOFTSWISS message bodies, one per alert type (+2 multi-config releases, +2 prose dialect)
