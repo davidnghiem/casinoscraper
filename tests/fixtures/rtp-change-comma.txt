@@ -1,0 +1,7 @@
+Provider Mentioned
+Source: SOFTSWISS GA announcements
+Time: 2026-05-19 07:54:53
+
+Message:
+Please note that:
+the value of RTP in the game Blazing Fire Pots Hold & Spin (BGaming) has been changed from "94,11" to "96,27"

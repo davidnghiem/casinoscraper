@@ -1,0 +1,44 @@
+New Games Released
+
+Source: SOFTSWISS GA announcements
+Time: 2026-05-21 11:54:58
+
+Curacao+Malta
+
+Red Rascal (Hacksaw)
+Fee: hacksaw_rtp | RTP: 92.26 | Certs: BG CA-ON CW EE GE LV LT MT NL RO
+
+The Big Dog House (Pragmaticplay)
+Fee: basic | RTP: 96.53 | Certs: CW MT EE BR GE LV LT NL CA-ON PT RO
+
+Jackpot Train (Evolution/Redtiger)
+Fee: redtiger_basic | RTP: 96.07 | Certs: CW EE MT
+
+Phoenix Heat (Playtech)
+Fee: gpas | RTP: 93.44 | Certs: CW MT EE BR CA-ON ES NL PE PT RO
+
+Treats of Terror II (Playngo)
+Fee: basic | RTP: 96.20 | Certs: CW MT EE
+
+What's Up? Witches (Evolution/Netent)
+Fee: netent_basic_rtp94 | RTP: 94.06 | Certs: CW EE MT BR CA-ON RO PE PT GR ES
+
+Only Curacao
+
+Football Mines (PoggiPlay)
+Fee: basic | RTP: 98.00 | Certs: NO_LICENSE
+
+Cricket Legacy BB (Barbarabang)
+Fee: basic | RTP: 96.77 | Certs: CW
+
+Blazing Roulette (Platipus)
+Fee: live | RTP: 97.30 | Certs: CW
+
+Fortune Ways X10 (Platipus)
+Fee: basic_cu | RTP: 96.00 | Certs: CW
+
+Red Dragon of Luck (Onlyplay)
+Fee: basic | RTP: 95.66 | Certs: CW
+
+Classic Chilli Hold And Win (1spin4win)
+Fee: basic | RTP: 97.10 | Certs: CW

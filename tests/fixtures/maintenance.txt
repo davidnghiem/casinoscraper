@@ -1,0 +1,9 @@
+Provider Mentioned
+Source: SOFTSWISS GA announcements
+
+Message:
+Dear partners,
+Please note the upcoming maintenance related to the Yggdrasil integration.
+Release date: 19.05.26
+Start time: 08:00 UTC
+Duration: 30 min

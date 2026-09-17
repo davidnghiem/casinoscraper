@@ -1,4 +1,9 @@
 node_modules/
+dist/
 .env
 *.log
 .playwright-state/
+state/
+# Environment-specific TLS-interception root (e.g. Cloudflare WARP/Zero Trust).
+# Each machine exports its own; never commit. See README "Behind a TLS proxy".
+certs/

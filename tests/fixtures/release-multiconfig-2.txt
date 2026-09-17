@@ -1,0 +1,50 @@
+New Games Released
+
+Source: SOFTSWISS GA announcements
+Time: 2026-09-17 12:07:20
+
+Curacao+Malta
+
+Wolf of London (Yggdrasil/Fish&Chips)
+Fee: basic | RTP: 96.80 | Certs: CW EE KA LV MT NL BR
+
+Fist of Destruction Megamultiplier (Hacksaw)
+Fee: hacksaw_basic | RTP: 96.23 | Certs: CW EE MT BG BR GE GR ES IT LV LT NL PE PT RO HR CH CA-ON
+Fee: hacksaw_rtp94 | RTP: 94.29 | Certs: CW EE MT BG BR GE GR ES IT LV LT NL PE PT RO HR CH CA-ON
+Fee: hacksaw_rtp | RTP: 92.28 | Certs: BG CA-ON CW EE GE GR IT LV LT MT NL RO ES
+
+Tasty Rush Sweet Spots (Booming)
+Fee: basic | RTP: 95.90 | Certs: CW MT EE KA CA-ON PT IT ES GR BR PE RO
+
+Lawn n' Complete Disorder (Playngo)
+Fee: basic | RTP: 96.22 | Certs: CW KA MT EE
+
+Big Bad Wolf: High Steaks (Playtech)
+Fee: gpas | RTP: 95.83 | Certs: BR BG CA-ON HR CW EE GR IT KA LV LT MT PE PT RO ES
+Fee: gpas | RTP: 94.86 | Certs: CW MT EE KA IT BR CA-ON ES NL RO PT CH
+Fee: gpas | RTP: 93.85 | Certs: CW EE KA MT PE ES NL
+
+Cash Fortress (Playtech)
+Fee: gpas | RTP: 95.90 | Certs: HR CW EE GR IT KA LV LT MT PT RO ZA ES BG CA-ON BR PE
+Fee: gpas | RTP: 94.91 | Certs: CW EE KA MT IT RO PT NL ES BR CA-ON CH
+Fee: gpas | RTP: 93.46 | Certs: CW EE KA MT NL ES PE
+Fee: gpas | RTP: 91.96 | Certs: CW EE KA MT ES
+
+Vault of the Deep (Playtech)
+Fee: gpas | RTP: 95.83 | Certs: CW EE KA MT IT RO PT BR ZA HR CA-ON LV ES LT GR BG PE
+Fee: gpas | RTP: 94.86 | Certs: CW EE KA MT IT RO PT BR NL CA-ON ES CH
+Fee: gpas | RTP: 93.85 | Certs: CW EE KA MT NL ES PE
+Fee: gpas | RTP: 91.87 | Certs: CW EE KA MT ES
+
+Almighty Mustang Express White Bison (Blueprint)
+Fee: blueprint_basic | RTP: 94.30 | Certs: CA-ON CW EE MT NL
+Fee: blueprint_basic | RTP: 92.00 | Certs: CA-ON CW EE MT NL
+
+Jack and the Beanstalk 2 (Evolution/Netent)
+Fee: netent_basic | RTP: 96.45 | Certs: CW MT EE
+Fee: netent_basic | RTP: 96.32 | Certs: CW MT EE
+Fee: netent_basic_rtp94 | RTP: 94.27 | Certs: CW MT EE
+Fee: netent_basic_rtp94 | RTP: 94.23 | Certs: CW MT EE
+
+Thor’s Thunder Strike (Spinomenal)
+Fee: basicmga | RTP: 96.20 | Certs: CW EE MT

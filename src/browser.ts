@@ -1,5 +1,6 @@
 import { chromium } from 'playwright-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import type { Browser, BrowserContext } from 'playwright';
 
 chromium.use(StealthPlugin());
 
@@ -10,14 +11,21 @@ const COMMON_UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ' +
   '(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 
-let browser = null;
-let starting = null;
-const contexts = new Map();
+let browser: Browser | null = null;
+let starting: Promise<Browser> | null = null;
 
-async function getBrowser() {
+interface CtxEntry {
+  context?: BrowserContext;
+  warmedAt?: number;
+  warming?: Promise<BrowserContext> | null;
+}
+
+const contexts = new Map<string, CtxEntry>();
+
+async function getBrowser(): Promise<Browser> {
   if (browser) return browser;
   if (starting) return starting;
-  starting = chromium.launch({ headless: true }).then((b) => {
+  starting = chromium.launch({ headless: true }).then((b: Browser) => {
     browser = b;
     starting = null;
     return b;
@@ -25,14 +33,21 @@ async function getBrowser() {
   return starting;
 }
 
-export async function getWarmContext(key, warmupUrl) {
+export async function getWarmContext(
+  key: string,
+  warmupUrl: string
+): Promise<BrowserContext> {
   const existing = contexts.get(key);
-  if (existing?.context && Date.now() - existing.warmedAt < CTX_TTL_MS) {
+  if (
+    existing?.context &&
+    existing.warmedAt != null &&
+    Date.now() - existing.warmedAt < CTX_TTL_MS
+  ) {
     return existing.context;
   }
   if (existing?.warming) return existing.warming;
 
-  const warming = (async () => {
+  const warming = (async (): Promise<BrowserContext> => {
     const b = await getBrowser();
     if (existing?.context) await existing.context.close().catch(() => {});
     const ctx = await b.newContext({
@@ -54,13 +69,19 @@ export async function getWarmContext(key, warmupUrl) {
     }
     contexts.set(key, { context: ctx, warmedAt: Date.now(), warming: null });
     return ctx;
-  })();
+  })().catch((err) => {
+    // Don't poison the cache with a rejected promise — without this, every
+    // subsequent call returns the same Cloudflare/timeout rejection forever.
+    // Delete the entry so the next call kicks off a fresh warmup.
+    contexts.delete(key);
+    throw err;
+  });
 
   contexts.set(key, { ...(existing || {}), warming });
   return warming;
 }
 
-export async function shutdownBrowser() {
+export async function shutdownBrowser(): Promise<void> {
   for (const entry of contexts.values()) {
     if (entry?.context) await entry.context.close().catch(() => {});
   }

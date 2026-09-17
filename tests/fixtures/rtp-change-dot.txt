@@ -1,0 +1,6 @@
+Provider Mentioned
+Source: SOFTSWISS GA announcements
+Time: 2026-05-21 11:54:58
+
+Message:
+Please note that the value of RTP in the game Gunslinger Glory (Yggdrasil/Boomerang) has been changed from "96.0" to "94.0".

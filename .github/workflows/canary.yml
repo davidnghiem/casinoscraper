@@ -1,0 +1,52 @@
+name: Dicey schema canary
+
+# Daily probe of api.dicey.com/graphql to catch GameList query-shape regressions
+# before they surface as wrong "Not on Dicey" replies in real recall alerts.
+on:
+  schedule:
+    - cron: '0 13 * * *' # daily at 13:00 UTC ≈ 9am ET
+  workflow_dispatch: # manual trigger from the Actions tab
+
+permissions:
+  contents: read
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - id: canary
+        name: Run canary
+        run: npm run canary
+        continue-on-error: true
+
+      - name: Post failure to Slack errors channel
+        if: steps.canary.outcome == 'failure'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_ERRORS_CHANNEL_ID: ${{ secrets.SLACK_ERRORS_CHANNEL_ID }}
+        run: |
+          if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$SLACK_ERRORS_CHANNEL_ID" ]; then
+            echo "::warning::Slack secrets not set; skipping Slack post"
+            exit 0
+          fi
+          curl -sS -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            --data "{
+              \"channel\": \"$SLACK_ERRORS_CHANNEL_ID\",
+              \"text\": \":rotating_light: *casinoscraper Dicey canary failed* — see <${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}|run logs>. Likely a Dicey GraphQL schema change.\"
+            }"
+
+      - name: Fail the workflow if canary failed
+        if: steps.canary.outcome == 'failure'
+        run: exit 1

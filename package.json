@@ -1,12 +1,18 @@
 {
   "name": "casinoscraper",
   "version": "0.1.0",
-  "description": "Slack bot that checks new slot releases on Shuffle and Stake (availability + RTP).",
+  "description": "Slack bot that processes SOFTSWISS Alerts (release / recall / URGENT / RTP change / enabled-back / maintenance) and reconciles against Dicey + competitor casinos.",
   "type": "module",
-  "main": "src/index.js",
+  "main": "dist/src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dryrun": "node scripts/dryrun.js"
+    "start": "node dist/src/index.js",
+    "dev": "node scripts/run-with-ca.mjs tsx src/index.ts",
+    "dryrun": "node scripts/run-with-ca.mjs tsx scripts/dryrun.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/run-with-ca.mjs node --import tsx --test tests/*.test.ts",
+    "canary": "node scripts/run-with-ca.mjs tsx scripts/canary.ts",
+    "dryrun:alerts": "node scripts/run-with-ca.mjs tsx scripts/dryrun-alerts.ts"
   },
   "engines": {
     "node": ">=22"
@@ -15,8 +21,15 @@
     "@slack/bolt": "^4.0.0",
     "dotenv": "^17.0.0",
     "fuse.js": "^7.0.0",
+    "fuzzball": "^2.2.6",
+    "pino": "^10.3.1",
     "playwright": "^1.48.0",
     "playwright-extra": "^4.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.0"
   }
 }

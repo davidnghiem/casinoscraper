@@ -1,0 +1,14 @@
+New Games Released
+
+Source: SOFTSWISS GA announcements
+Time: 2026-09-15 10:53:46
+
+Curacao+Malta
+
+Le Bandit Hold & Win (Hacksaw)
+Fee: hacksaw_basic | RTP: 96.27 | Certs: BR BG CA-ON CW EE GE GR IT LV LT MT NL PE PT ES RO
+Fee: hacksaw_rtp94 | RTP: 94.29 | Certs: BR BG CA-ON CW EE GE GR IT LV LT MT NL PE PT ES CH HR RO
+Fee: hacksaw_rtp | RTP: 92.23 | Certs: BG CA-ON CW EE GE GR IT LV LT MT NL ES RO
+
+7 Seas Raiders (Yggdrasil/NeoTopia)
+Fee: basic | RTP: 94.00 | Certs: CW EE MT KA BR NL LV IT

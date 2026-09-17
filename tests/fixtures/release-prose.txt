@@ -1,0 +1,110 @@
+Dear team!
+The following games are released today:
+
+Curacao+Malta:
+
+Toothrot Tilly (Hacksaw/PineapplePlay):
+    - fee group: hacksaw_basic ; RTP - 96.34
+    - fee group: hacksaw_rtp94 ; RTP - 94.35
+    - Certifications: CA-ON CW EE IT LV MT NL PT RO ES
+
+100 Sevens - Diamond Treasures (ApparatGaming):
+    - fee group: basic ; RTP - 96.19
+    - Certifications: CW EE KA MT
+
+Thunder Walker (Reevo):
+    - fee group: reevo_basic ; RTP - 95.72
+    - Certifications: CW EE IT MT
+
+Raiders of the East Dice (BFGames):
+    - fee group: basic ; RTP - 96.30
+    - Certifications: BE CW EE MT RS KA
+
+Oktobeer Gold (BFGames):
+    - fee group: basic ; RTP - 96.09
+    - Certifications: BE CW EE LV MT NL RS KA
+
+81 Fruits Fire Blaze (Spinomenal/Retrogaming):
+    - fee group: retro_basic ; RTP - 96.17
+    - Certifications: CW EE MT
+
+Area Build'R Leprechauns Super Spin (Quickfire/Spinplay):
+    - fee group: basic ; RTP - 96.47
+    - Certifications: BE CA-ON CW EE MT
+    - fee group: basic_rtp94 ; RTP - 94.48
+    - Certifications: BE BR CA-ON CW EE ES IT MT NL
+    - fee group: basic_rtp ; RTP - 92.48
+    - Certifications: BE BR CA-ON CW EE ES IT MT NL
+
+Magnificent Link Flamecrest Phoenix (Quickfire/Orosgaming):
+    - fee group: basic ; RTP - 96.20
+    - Certifications: BE CA-ON CW EE MT
+    - fee group: basic_rtp94 ; RTP - 94.20
+    - Certifications: BE BR CA-ON CW EE IT MT NL PT ES HR
+    - fee group: basic_rtp ; RTP - 92.20
+    - Certifications: BE BR CA-ON CW EE IT MT NL ES
+
+Power Vault Multi (Pushgaming):
+    - fee group: basic_lv ; RTP - 96.40
+    - fee group: basic_rtp94_lv ; RTP - 94.30
+    - Certifications: BR BG CA-ON CW EE GE GR IT LV MT NL RO RS ES CH
+
+Free Bet Blackjack 12 (Evolution):
+    - fee group: live_classic_premium ; RTP - 99.29
+    - Certifications: CW EE MT RO
+
+Only Curacao:
+
+Air Combat 1942 (KAGaming):
+    - fee group: basic ; RTP - 96.00
+    - Certifications: CW
+
+Goal Scored (KAGaming):
+    - fee group: basic ; RTP - 96.00
+    - Certifications: CW
+
+Moon Palace Lab (KAGaming):
+    - fee group: basic ; RTP - 96.00
+    - Certifications: CW
+
+Pharaoh Mage (KAGaming):
+    - fee group: basic ; RTP - 96.00
+    - Certifications: CW
+
+Woof Wonderland (KAGaming):
+    - fee group: basic ; RTP - 96.00
+    - Certifications: CW
+
+Goblin's Restaurant (KAGaming):
+    - fee group: basic ; RTP - 96.00
+    - Certifications: CW
+
+Lava Power: Hold the Spin (Gamzix):
+    - fee group: basic ; RTP - 96.01
+    - Certifications: CW KA
+
+Porko Wins (EGT):
+    - fee group: basic ; RTP - 96.35
+    - Certifications: BE CW EE KA RS SR UA
+
+40 Fruits & Gold Coin Boost (EGT):
+    - fee group: basic ; RTP - 96.02
+    - Certifications: BE CW EE KA RS SR UA
+
+27 Wild Stack Extreme (Fazi):
+    - fee group: basic ; RTP - 96.51
+    - Certifications: CW
+
+Super Fireballs (Fazi):
+    - fee group: basic ; RTP - 96.00
+    - Certifications: CW
+
+Only Malta:
+
+Throne of Elements: Platinum (Wazdan):
+    - fee group: basic ; RTP - 96.15
+    - fee group: rtp ; RTP - 94.16
+    - Certifications: EE MT
+
+Please note that:
+the game Jungle Volcano (3oaks) has become available on Greece.
