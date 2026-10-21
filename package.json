@@ -15,7 +15,7 @@
     "dryrun:alerts": "node scripts/run-with-ca.mjs tsx scripts/dryrun-alerts.ts"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24.22.1 <25"
   },
   "dependencies": {
     "@slack/bolt": "^4.0.0",
