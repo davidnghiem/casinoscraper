@@ -285,7 +285,7 @@ Roobet's listing counts toward availability but is excluded from RTP alignment (
 ```sh
 git clone https://github.com/davidnghiem/casinoscraper.git
 cd casinoscraper
-nvm use                # reads .nvmrc -> Node 22, matching CI and `engines`
+nvm use                # reads .nvmrc -> Node 24.22.1, matching CI and `engines`
 npm install
 npx playwright install chromium
 cp .env.example .env   # fill in SLACK_BOT_TOKEN, SLACK_APP_TOKEN
@@ -294,11 +294,10 @@ npm run dev            # tsx-driven, hot path
 
 ### Node version
 
-`package.json` requires `node >= 22` and `.github/workflows/canary.yml` pins
-`node-version: '22'`, so `.nvmrc` pins 22 to keep local, CI and prod on the same
-runtime — `nvm use` in the project root picks it up. Node 20 will run the tests
-(tsx transpiles) but is below the declared floor, and `npm start` executes the
-plain `dist/` build with no transpiler in front of it, so don't deploy on it.
+`package.json` requires `node >=24.22.1 <25`. Both `.nvmrc` and the canary
+workflow pin Node 24.22.1, including the October 2026 security fixes.
+Run `nvm install` and `nvm use` in the project root before installing dependencies.
+The deployed host must also use Node 24.22.1 or a newer Node 24 patch.
 
 ### Behind a TLS-interception proxy (Cloudflare WARP / Zero Trust, corporate MITM)
 
@@ -405,7 +404,7 @@ A $5/mo VPS in **Toronto** (Vultr / DigitalOcean / Linode CA region) covers all 
 ```sh
 git clone https://github.com/davidnghiem/casinoscraper.git
 cd casinoscraper
-nvm use            # or otherwise ensure Node 22 (see .nvmrc)
+nvm use            # or otherwise ensure Node 24.22.1 (see .nvmrc)
 npm install && npx playwright install --with-deps chromium
 cp .env.example .env && nano .env
 npm run build
